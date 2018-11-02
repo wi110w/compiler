@@ -18,23 +18,29 @@ class Lexer:
         self.current_state = READY_STATE
         self.identifier = ''
         self.text = ''
-        self.i = 0
+        self.column = 0
+        self.line = 0
 
     def parse_string(self, string):
-        self.i = 0
+        self.column = 0
+        self.line = 0
         self.text = string
         lexeme = ''
+        begin_lexeme = 0
         while True:
             if self.current_state == READY_STATE:
                 symbol = self.peek()
                 if not symbol:
+                    print("EOF")
                     break
                 if symbol in delimiters:
                     self.current_state = DELIMITER_STATE
+                    begin_lexeme = self.column
                     symbol = self.pop()
                     lexeme += symbol
                 elif 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z':
                     self.current_state = IDENTIFIER_STATE
+                    begin_lexeme = self.column
                     symbol = self.pop()
                     lexeme += symbol
                 elif symbol in whitespaces:
@@ -44,41 +50,46 @@ class Lexer:
                 symbol = self.peek()
                 if not symbol:
                     if lexeme in keywords:
-                        print("KEYWORD: " + lexeme)
+                        print("KEYWORD: " + lexeme + "\n Line: "
+                              + str(self.line) + ', column: ' + str(begin_lexeme))
                     else:
-                        print("IDENTIFIER: " + lexeme)
+                        print("IDENTIFIER: " + lexeme + "\n Line: "
+                              + str(self.line) + ', column: ' + str(begin_lexeme))
                         identifiers.add(lexeme)
 
                     self.current_state = READY_STATE
                     lexeme = ''
 
-                elif 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z':
+                elif 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z' or '0' <= symbol <= '9':
                     symbol = self.pop()
                     lexeme += symbol
                 else:
                     if lexeme in keywords:
-                        print("KEYWORD: " + lexeme)
+                        print("KEYWORD: " + lexeme + "\n Line: "
+                              + str(self.line) + ', column: ' + str(begin_lexeme))
                     else:
-                        print("IDENTIFIER: " + lexeme)
+                        print("IDENTIFIER: " + lexeme + "\n Line: "
+                              + str(self.line) + ', column: ' + str(begin_lexeme))
                         identifiers.add(lexeme)
 
                     self.current_state = READY_STATE
                     lexeme = ''
                 continue
             if self.current_state == DELIMITER_STATE:
-                print("DELIMITER: " + lexeme)
+                print("DELIMITER: " + lexeme + "\n Line: "
+                      + str(self.line) + ', column: ' + str(begin_lexeme))
                 self.current_state = READY_STATE
                 lexeme = ''
                 continue
 
     def peek(self):
-        if self.i >= len(self.text):
+        if self.column >= len(self.text):
             return None
-        return self.text[self.i]
+        return self.text[self.column]
 
     def pop(self):
-        if self.i >= len(self.text):
+        if self.column >= len(self.text):
             return None
-        symbol = self.text[self.i]
-        self.i += 1
+        symbol = self.text[self.column]
+        self.column += 1
         return symbol
