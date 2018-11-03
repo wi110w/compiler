@@ -45,6 +45,11 @@ class Lexer:
                     lexeme += symbol
                 elif symbol in whitespaces:
                     symbol = self.pop()
+                else:
+                    self.current_state = ERROR_STATE
+                    begin_lexeme = self.column
+                    lexeme += symbol
+                    symbol = self.pop()
                 continue
             if self.current_state == IDENTIFIER_STATE:
                 symbol = self.peek()
@@ -79,6 +84,12 @@ class Lexer:
                 print("DELIMITER: " + lexeme + "\n Line: "
                       + str(self.line) + ', column: ' + str(begin_lexeme))
                 self.current_state = READY_STATE
+                lexeme = ''
+                continue
+            if self.current_state == ERROR_STATE:
+                self.current_state = READY_STATE
+                print("Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
+                             lexeme, self.line, begin_lexeme))
                 lexeme = ''
                 continue
 
