@@ -22,11 +22,12 @@ class Lexer:
         self.column = 0
         self.line = 0
 
-    def parse_string(self, string):
+    def parse_string(self, string, callback=print):
         self.column = 1
         self.symbol_counter = 0
         self.line = 1
         self.text = string
+        identifiers_code = 1001
         previous_lexeme = ''
         lexeme = ''
         begin_lexeme = 0
@@ -37,7 +38,13 @@ class Lexer:
                 if not symbol:
                     print("EOF")
                     break
-                if symbol in delimiters:
+                if symbol == '(':
+                    self.current_state = BEGIN_COMMENT_STATE
+                    begin_lexeme = self.column
+                    symbol = self.pop()
+                    lexeme += symbol
+                    continue
+                if symbol in delimiters.keys():
                     self.current_state = DELIMITER_STATE
                     begin_lexeme = self.column
                     symbol = self.pop()
@@ -45,12 +52,6 @@ class Lexer:
                     continue
                 if 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z':
                     self.current_state = IDENTIFIER_STATE
-                    begin_lexeme = self.column
-                    symbol = self.pop()
-                    lexeme += symbol
-                    continue
-                if symbol == '(':
-                    self.current_state = BEGIN_COMMENT_STATE
                     begin_lexeme = self.column
                     symbol = self.pop()
                     lexeme += symbol
@@ -71,13 +72,20 @@ class Lexer:
             if self.current_state == IDENTIFIER_STATE:
                 symbol = self.peek()
                 if not symbol:
-                    if lexeme in keywords:
-                        print("KEYWORD: {0}\n line: {1}, column: {2}".format(
-                            lexeme, str(self.line), str(begin_lexeme)))
+                    if lexeme in keywords.keys():
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, keywords[lexeme], lexeme
+                        ))
+                        # callback("KEYWORD: {0}\n line: {1}, column: {2}".format(
+                        #     lexeme, str(self.line), str(begin_lexeme)))
                     else:
-                        print("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
-                            lexeme, str(self.line), str(begin_lexeme)))
-                        identifiers.add(lexeme)
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers_code, lexeme
+                        ))
+                        # callback("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
+                        #     lexeme, str(self.line), str(begin_lexeme)))
+                        identifiers[lexeme] = identifiers_code
+                        identifiers_code += 1
 
                     self.current_state = READY_STATE
                     lexeme = ''
@@ -87,13 +95,20 @@ class Lexer:
                     symbol = self.pop()
                     lexeme += symbol
                     continue
-                if lexeme in keywords:
-                    print("KEYWORD: {0}\n line: {1}, column: {2}".format(
-                        lexeme, str(self.line), str(begin_lexeme)))
+                if lexeme in keywords.keys():
+                    callback("{0}\t{1}\t{2}\t{3}".format(
+                        self.line, begin_lexeme, keywords[lexeme], lexeme
+                    ))
+                    # callback("KEYWORD: {0}\n line: {1}, column: {2}".format(
+                    #     lexeme, str(self.line), str(begin_lexeme)))
                 else:
-                    print("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
-                        lexeme, str(self.line), str(begin_lexeme)))
-                    identifiers.add(lexeme)
+                    callback("{0}\t{1}\t{2}\t{3}".format(
+                        self.line, begin_lexeme, identifiers_code, lexeme
+                    ))
+                    # callback("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
+                    #     lexeme, str(self.line), str(begin_lexeme)))
+                    identifiers[lexeme] = identifiers_code
+                    identifiers_code += 1
 
                 self.current_state = READY_STATE
                 lexeme = ''
@@ -101,16 +116,22 @@ class Lexer:
 
             # DELIMITER STATE
             if self.current_state == DELIMITER_STATE:
-                print("DELIMITER: {0}\n line: {1}, column: {2} ".format(
-                    lexeme, str(self.line), str(begin_lexeme)))
+                callback("{0}\t{1}\t{2}\t{3}".format(
+                    self.line, begin_lexeme, delimiters[lexeme], lexeme
+                ))
+                # callback("DELIMITER: {0}\n line: {1}, column: {2}".format(
+                #     lexeme, str(self.line), str(begin_lexeme)))
                 self.current_state = READY_STATE
                 lexeme = ''
                 continue
 
             # SECOND DELIMITER STATE
             if self.current_state == SECOND_DELIMITER_STATE:
-                print("DELIMITER: {0}\n line: {1}, column: {2}".format(
-                    lexeme, str(self.line), str(begin_lexeme)))
+                callback("{0}\t{1}\t{2}\t{3}".format(
+                    self.line, begin_lexeme, delimiters[lexeme], lexeme
+                ))
+                # callback("DELIMITER: {0}\n line: {1}, column: {2}".format(
+                #     lexeme, str(self.line), str(begin_lexeme)))
                 self.current_state = READY_STATE
                 lexeme = ''
                 continue
@@ -119,12 +140,11 @@ class Lexer:
             if self.current_state == ERROR_STATE:
                 self.current_state = READY_STATE
                 if previous_lexeme == '*':
-                    print("Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
-                        self.line, begin_lexeme
-                    ))
+                    callback("Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
+                        self.line, begin_lexeme))
                     previous_lexeme = ''
                     continue
-                print("Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
+                callback("Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
                              lexeme, self.line, begin_lexeme))
                 lexeme = ''
                 continue
@@ -172,9 +192,6 @@ class Lexer:
                     continue
                 symbol = self.pop()
                 continue
-
-
-
 
     def peek(self):
         if self.symbol_counter >= len(self.text):
