@@ -1,0 +1,15 @@
+(* This is first program *)
+PROG(***)RAM Hel(*
+
+
+*)loWor
+(*ld*)1;
+
+
+	BE(**)GIN
+	PROCEDURE proc:(tell, well, sell);
+	INTEG(*:%;№"№;%:?**)ER terra:tell;
+	BLOCKFLOAT 1145GHH rec0rd1:well;
+	SIGNAL sig:sell;
+	END
+EXT
