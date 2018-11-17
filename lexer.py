@@ -28,6 +28,7 @@ class Lexer:
         self.line = 1
         self.text = string
         identifiers_code = 1001
+        constants_code = 501
         previous_lexeme = ''
         lexeme = ''
         begin_lexeme = 0
@@ -50,6 +51,12 @@ class Lexer:
                     symbol = self.pop()
                     lexeme += symbol
                     continue
+                if '0' <= symbol <= '9':
+                    self.current_state = NUMBER_CONSTANT_STATE
+                    begin_lexeme = self.column
+                    symbol = self.pop()
+                    lexeme += symbol
+                    continue
                 if 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z':
                     self.current_state = IDENTIFIER_STATE
                     begin_lexeme = self.column
@@ -60,6 +67,8 @@ class Lexer:
                     if symbol == '\n':
                         self.line += 1
                         self.column = 1
+                    if symbol == '\t':
+                        self.column += 3
                     symbol = self.pop()
                     continue
                 self.current_state = ERROR_STATE
@@ -172,6 +181,9 @@ class Lexer:
                     self.current_state = ERROR_STATE
                     begin_lexeme = self.column
                     continue
+                if symbol == '\n':
+                    self.line += 1
+                    self.column = 1
                 symbol = self.pop()
                 continue
 
@@ -191,6 +203,30 @@ class Lexer:
                     begin_lexeme = self.column
                     continue
                 symbol = self.pop()
+                continue
+
+            # NUMBER_CONSTANT_STATE
+            if self.current_state == NUMBER_CONSTANT_STATE:
+                symbol = self.peek()
+                if 'a' <= symbol <= 'z' or 'A' <= symbol <= 'Z':
+                    lexeme += symbol
+                    symbol = self.pop()
+                    symbol = self.peek()
+                    if symbol in whitespaces or not symbol:
+                        self.current_state = ERROR_STATE
+                        continue
+                    continue
+                if '0' <= symbol <= '9':
+                    lexeme += symbol
+                    symbol += self.pop()
+                    continue
+                callback("{0}\t{1}\t{2}\t{3}".format(
+                    self.line, begin_lexeme, constants_code, lexeme))
+                constants[lexeme] = constants_code
+                constants_code += 1
+
+                self.current_state = READY_STATE
+                lexeme = ''
                 continue
 
     def peek(self):
