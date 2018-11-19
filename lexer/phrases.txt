@@ -1,0 +1,7 @@
+PROGRAM Hello;
+    BEGIN
+    PROCEDURE this
+        bla 123;
+        bla;
+        bla 44;
+    END

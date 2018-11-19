@@ -1,0 +1,4 @@
+PROGRAM hello
+program Hello
+SIGNAL sig
+LINK nolink

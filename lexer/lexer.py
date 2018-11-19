@@ -1,5 +1,6 @@
 from states import *
 from tables import *
+from lexeme import Lexeme
 
 '''
 * Peek and Pop
@@ -23,6 +24,7 @@ class Lexer:
         self.line = 0
 
     def parse_string(self, string, callback=print):
+        lexemes = []
         self.column = 1
         self.symbol_counter = 0
         self.line = 1
@@ -32,12 +34,14 @@ class Lexer:
         previous_lexeme = ''
         lexeme = ''
         begin_lexeme = 0
+        alpha_lexeme = False
         while True:
             # READY STATE
             if self.current_state == READY_STATE:
                 symbol = self.peek()
                 if not symbol:
                     print("EOF")
+                    lexemes.append(Lexeme(self.line, self.column, "EOF", 0))
                     break
                 if symbol == '(':
                     self.current_state = BEGIN_COMMENT_STATE
@@ -85,14 +89,15 @@ class Lexer:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, keywords[lexeme], lexeme
                         ))
-                        # callback("KEYWORD: {0}\n line: {1}, column: {2}".format(
-                        #     lexeme, str(self.line), str(begin_lexeme)))
+                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, keywords[lexeme]))
+
                     else:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers_code, lexeme
                         ))
-                        # callback("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
-                        #     lexeme, str(self.line), str(begin_lexeme)))
+
+                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
+
                         identifiers[lexeme] = identifiers_code
                         identifiers_code += 1
 
@@ -108,16 +113,22 @@ class Lexer:
                     callback("{0}\t{1}\t{2}\t{3}".format(
                         self.line, begin_lexeme, keywords[lexeme], lexeme
                     ))
-                    # callback("KEYWORD: {0}\n line: {1}, column: {2}".format(
-                    #     lexeme, str(self.line), str(begin_lexeme)))
+                    lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, keywords[lexeme]))
+
                 else:
-                    callback("{0}\t{1}\t{2}\t{3}".format(
-                        self.line, begin_lexeme, identifiers_code, lexeme
-                    ))
-                    # callback("IDENTIFIER: {0}\n line: {1}, column: {2}".format(
-                    #     lexeme, str(self.line), str(begin_lexeme)))
-                    identifiers[lexeme] = identifiers_code
-                    identifiers_code += 1
+                    if lexeme in identifiers.keys():
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers[lexeme], lexeme
+                         ))
+
+                    else:
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers_code, lexeme
+                        ))
+                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
+
+                        identifiers[lexeme] = identifiers_code
+                        identifiers_code += 1
 
                 self.current_state = READY_STATE
                 lexeme = ''
@@ -128,8 +139,8 @@ class Lexer:
                 callback("{0}\t{1}\t{2}\t{3}".format(
                     self.line, begin_lexeme, delimiters[lexeme], lexeme
                 ))
-                # callback("DELIMITER: {0}\n line: {1}, column: {2}".format(
-                #     lexeme, str(self.line), str(begin_lexeme)))
+                lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, delimiters[lexeme]))
+
                 self.current_state = READY_STATE
                 lexeme = ''
                 continue
@@ -139,8 +150,8 @@ class Lexer:
                 callback("{0}\t{1}\t{2}\t{3}".format(
                     self.line, begin_lexeme, delimiters[lexeme], lexeme
                 ))
-                # callback("DELIMITER: {0}\n line: {1}, column: {2}".format(
-                #     lexeme, str(self.line), str(begin_lexeme)))
+                lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, delimiters[lexeme]))
+
                 self.current_state = READY_STATE
                 lexeme = ''
                 continue
@@ -149,11 +160,11 @@ class Lexer:
             if self.current_state == ERROR_STATE:
                 self.current_state = READY_STATE
                 if previous_lexeme == '*':
-                    callback("Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
+                    callback("Lexer Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
                         self.line, begin_lexeme))
                     previous_lexeme = ''
                     continue
-                callback("Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
+                callback("Lexer Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
                              lexeme, self.line, begin_lexeme))
                 lexeme = ''
                 continue
@@ -210,18 +221,19 @@ class Lexer:
                 symbol = self.peek()
                 if 'a' <= symbol <= 'z' or 'A' <= symbol <= 'Z':
                     lexeme += symbol
+                    alpha_lexeme = True
                     symbol = self.pop()
-                    symbol = self.peek()
-                    if symbol in whitespaces or not symbol:
-                        self.current_state = ERROR_STATE
-                        continue
                     continue
                 if '0' <= symbol <= '9':
                     lexeme += symbol
                     symbol += self.pop()
                     continue
+                if alpha_lexeme and (symbol in whitespaces or not symbol):
+                    self.current_state = ERROR_STATE
+                    continue
                 callback("{0}\t{1}\t{2}\t{3}".format(
                     self.line, begin_lexeme, constants_code, lexeme))
+                lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, constants_code))
                 constants[lexeme] = constants_code
                 constants_code += 1
 

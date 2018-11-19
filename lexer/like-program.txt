@@ -2,14 +2,17 @@
 PROG(***)RAM Hel(*
 
 
+ 3434637
+
 *)loWor
 (*ld*)1;
 
-
-	BE(**)GIN
+	1223
+		BE(**)GIN
 	PROCEDURE proc:(tell, well, sell);
 	INTEG(*:%;№"№;%:?**)ER terra:tell;
 	BLOCKFLOAT 1145GHH rec0rd1:well;
 	SIGNAL sig:sell;
+	INTEGER 2345:rec0rd;
 	END
 EXT
