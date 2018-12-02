@@ -4,3 +4,5 @@ identifiers = dict()
 constants = dict()
 delimiters = {':': 58,  ';': 59,  ',': 44,  ')': 41, '(': 40}
 whitespaces = {'\n', ' ', '\r', '\t'}
+non_available_symbols = {'\\', '/', '*', '{', '}', '+', '-', '_', '=', '#',
+                         '@', '$', '%', '^', '!', '<', '>', '?', '.', '~', '`'}

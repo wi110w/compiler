@@ -35,6 +35,7 @@ class Lexer:
         lexeme = ''
         begin_lexeme = 0
         alpha_lexeme = False
+        non_available_lexeme = False
         while True:
             # READY STATE
             if self.current_state == READY_STATE:
@@ -43,6 +44,12 @@ class Lexer:
                     print("EOF")
                     lexemes.append(Lexeme(self.line, self.column, "EOF", 0))
                     break
+                if symbol == 'X' or symbol == 'V':
+                    self.current_state = BEGIN_IDENTIFIER_STATE
+                    begin_lexeme = self.column
+                    symbol = self.pop()
+                    lexeme += symbol
+                    continue
                 if symbol == '(':
                     self.current_state = BEGIN_COMMENT_STATE
                     begin_lexeme = self.column
@@ -80,6 +87,69 @@ class Lexer:
                 lexeme += symbol
                 symbol = self.pop()
                 continue
+
+            # BEGIN IDENTIFIER STATE
+            if self.current_state == BEGIN_IDENTIFIER_STATE:
+                symbol = self.peek()
+                if not symbol or symbol in whitespaces:
+                    self.current_state = ERROR_STATE
+                    continue
+                if symbol == '[':
+                    self.current_state = SECOND_IDENTIFIER_STATE
+                    symbol = self.pop()
+                    previous_lexeme = symbol
+                    lexeme += symbol
+                    continue
+
+            # SECOND IDENTIFIER STATE
+            if self.current_state == SECOND_IDENTIFIER_STATE:
+                symbol = self.peek()
+                if not symbol or symbol in whitespaces:
+                    self.current_state = ERROR_STATE
+                    begin_lexeme = self.column
+                    continue
+
+                if symbol in delimiters.keys() \
+                        or symbol in non_available_symbols:
+                    lexeme += symbol
+                    non_available_lexeme = True
+                    symbol = self.pop()
+                    continue
+
+                if 'A' <= symbol <= 'Z' or 'a' <= symbol <= 'z':
+                    lexeme += symbol
+                    alpha_lexeme = True
+                    symbol = self.pop()
+                    continue
+
+                if '0' <= symbol <= '9':
+                    symbol = self.pop()
+                    lexeme += symbol
+                    continue
+
+                if symbol == ']':
+                    lexeme += symbol
+                    symbol = self.pop()
+                    if alpha_lexeme or non_available_lexeme:
+                        self.current_state = ERROR_STATE
+                        previous_lexeme = ''
+                        continue
+                    self.current_state = READY_STATE
+                    if lexeme in identifiers.keys():
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers[lexeme], lexeme
+                        ))
+                    else:
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers_code, lexeme
+                        ))
+                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
+
+                        identifiers[lexeme] = identifiers_code
+                        identifiers_code += 1
+
+                    lexeme = ''
+                    continue
 
             # IDENTIFIER STATE
             if self.current_state == IDENTIFIER_STATE:
@@ -164,10 +234,17 @@ class Lexer:
             # ERROR STATE
             if self.current_state == ERROR_STATE:
                 self.current_state = READY_STATE
+                if previous_lexeme == '[':
+                    callback("Lexer Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
+                        self.line, begin_lexeme))
+                    previous_lexeme = ''
+                    lexeme = ''
+                    continue
                 if previous_lexeme == '*':
                     callback("Lexer Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
                         self.line, begin_lexeme))
                     previous_lexeme = ''
+                    lexeme = ''
                     continue
                 callback("Lexer Error: Unmatched input ('{0}'), line: {1}, column: {2}".format(
                              lexeme, self.line, begin_lexeme))
@@ -209,6 +286,7 @@ class Lexer:
                 if symbol == ')':
                     self.current_state = READY_STATE
                     symbol = self.pop()
+                    previous_lexeme = ''
                     continue
                 if symbol != '*':
                     self.current_state = COMMENT_STATE

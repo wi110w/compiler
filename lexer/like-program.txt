@@ -5,6 +5,13 @@ PROG(***)RAM Hel(*
  3434637
 
 *)loWor IN
+X[2235]
+	V[2365765]
+
+X[46gjytj664]
+V[5657
+X[hjhkhgk rhtrhy]
+V[4557\\//--]
 (*ld*)1;
     IN
 	1223
