@@ -82,9 +82,9 @@ class TestParse(unittest.TestCase):
             '3\t2\t58\t:',
             '4\t1\t40\t(',
             '4\t2\t41\t)',
-            'Error: Unmatched input (\'.\'), line: 5, column: 1',
-            'Error: Unmatched input (\'.\'), line: 5, column: 2',
-            'Error: Unmatched input (\'.\'), line: 5, column: 3'
+            'Lexer Error: Unmatched input (\'.\'), line: 5, column: 1',
+            'Lexer Error: Unmatched input (\'.\'), line: 5, column: 2',
+            'Lexer Error: Unmatched input (\'.\'), line: 5, column: 3'
         ]
         lexer = Lexer()
         lexer.parse_string(delimiters_samples, self.lexer_callback)
@@ -113,24 +113,26 @@ class TestParse(unittest.TestCase):
     def test_phrases(self):
         phrases_file = open("phrases.txt", "r")
         phrases_samples = phrases_file.read()
-        valid_identifiers = {'Hello': 1001, 'this': 1002, 'bla': 1003}
+        valid_identifiers = {'Hello': 1001, 'IN': 1002, 'this': 1003, 'bla': 1004}
         valid_constants = {'123': 501, '44': 502}
         valid_tokens = [
             '1\t1\t401\tPROGRAM',
             '1\t9\t1001\tHello',
             '1\t14\t59\t;',
             '2\t5\t402\tBEGIN',
+            '2\t11\t1002\tIN',
             '3\t5\t403\tPROCEDURE',
-            '3\t15\t1002\tthis',
-            '4\t9\t1003\tbla',
+            '3\t15\t1003\tthis',
+            '4\t9\t1004\tbla',
             '4\t13\t501\t123',
             '4\t16\t59\t;',
-            '5\t9\t1003\tbla',
+            '5\t9\t1004\tbla',
             '5\t12\t59\t;',
-            '6\t9\t1003\tbla',
+            '6\t9\t1004\tbla',
             '6\t13\t502\t44',
             '6\t15\t59\t;',
-            '7\t5\t404\tEND'
+            '7\t5\t404\tEND',
+            '7\t9\t1002\tIN'
         ]
         lexer = Lexer()
         lexer.parse_string(phrases_samples, self.lexer_callback)
@@ -147,26 +149,26 @@ class TestParse(unittest.TestCase):
         valid_identifiers = {'abbb': 1001, 'cd': 1002, 'program': 1003, 'notkeyword': 1004}
         valid_constants = dict()
         valid_tokens = [
-            'Error: Unmatched input (\'4abbc\'), line: 1, column: 1',
-            'Error: Unmatched input (\'12bbb555\'), line: 2, column: 1',
-            'Error: Unmatched input (\'*\'), line: 3, column: 1',
-            'Error: Unmatched input (\'*\'), line: 3, column: 2',
-            'Error: Unmatched input (\'*\'), line: 3, column: 3',
+            'Lexer Error: Unmatched input (\'4abbc\'), line: 1, column: 1',
+            'Lexer Error: Unmatched input (\'12bbb555\'), line: 2, column: 1',
+            'Lexer Error: Unmatched input (\'*\'), line: 3, column: 1',
+            'Lexer Error: Unmatched input (\'*\'), line: 3, column: 2',
+            'Lexer Error: Unmatched input (\'*\'), line: 3, column: 3',
             '3\t4\t41\t)',
             '4\t1\t1001\tabbb',
-            'Error: Unmatched input (\'/\'), line: 4, column: 5',
-            'Error: Unmatched input (\'/\'), line: 4, column: 6',
+            'Lexer Error: Unmatched input (\'/\'), line: 4, column: 5',
+            'Lexer Error: Unmatched input (\'/\'), line: 4, column: 6',
             '4\t7\t1002\tcd',
-            'Error: Unmatched input (\'\\\'), line: 5, column: 1',
-            'Error: Unmatched input (\'\\\'), line: 5, column: 2',
-            'Error: Unmatched input (\'/\'), line: 5, column: 4',
-            'Error: Unmatched input (\'/\'), line: 5, column: 5',
-            'Error: Unmatched input (\'.\'), line: 5, column: 7',
-            'Error: Unmatched input (\'`\'), line: 5, column: 9',
-            'Error: Unmatched input (\'?\'), line: 5, column: 10',
+            'Lexer Error: Unmatched input (\'\\\'), line: 5, column: 1',
+            'Lexer Error: Unmatched input (\'\\\'), line: 5, column: 2',
+            'Lexer Error: Unmatched input (\'/\'), line: 5, column: 4',
+            'Lexer Error: Unmatched input (\'/\'), line: 5, column: 5',
+            'Lexer Error: Unmatched input (\'.\'), line: 5, column: 7',
+            'Lexer Error: Unmatched input (\'`\'), line: 5, column: 9',
+            'Lexer Error: Unmatched input (\'?\'), line: 5, column: 10',
             '6\t1\t1003\tprogram',
             '6\t9\t1004\tnotkeyword',
-            'Error: Unexpected EOF inside the comment, line : 7, column: 17'
+            'Lexer Error: Unexpected EOF inside the comment, line : 7, column: 17'
         ]
         lexer = Lexer()
         lexer.parse_string(failures_samples, self.lexer_callback)
