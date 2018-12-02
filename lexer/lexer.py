@@ -92,14 +92,19 @@ class Lexer:
                         lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, keywords[lexeme]))
 
                     else:
-                        callback("{0}\t{1}\t{2}\t{3}".format(
-                            self.line, begin_lexeme, identifiers_code, lexeme
-                        ))
+                        if lexeme in identifiers.keys():
+                            callback("{0}\t{1}\t{2}\t{3}".format(
+                                self.line, begin_lexeme, identifiers[lexeme], lexeme
+                            ))
 
-                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
+                        else:
+                            callback("{0}\t{1}\t{2}\t{3}".format(
+                                self.line, begin_lexeme, identifiers_code, lexeme
+                            ))
+                            lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
 
-                        identifiers[lexeme] = identifiers_code
-                        identifiers_code += 1
+                            identifiers[lexeme] = identifiers_code
+                            identifiers_code += 1
 
                     self.current_state = READY_STATE
                     lexeme = ''
