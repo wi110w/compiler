@@ -1,7 +1,7 @@
 PROGRAM Hello;
-    BEGIN
+    BEGIN IN
     PROCEDURE this
         bla 123;
         bla;
         bla 44;
-    END
+    END IN

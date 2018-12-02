@@ -4,9 +4,9 @@ PROG(***)RAM Hel(*
 
  3434637
 
-*)loWor
+*)loWor IN
 (*ld*)1;
-
+    IN
 	1223
 		BE(**)GIN
 	PROCEDURE proc:(tell, well, sell);
@@ -15,4 +15,4 @@ PROG(***)RAM Hel(*
 	SIGNAL sig:sell;
 	INTEGER 2345:rec0rd;
 	END
-EXT
+EXT IN
