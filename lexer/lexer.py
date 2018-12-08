@@ -324,6 +324,8 @@ class Lexer:
                 lexeme = ''
                 continue
 
+        return lexemes
+
     def peek(self):
         if self.symbol_counter >= len(self.text):
             return None
