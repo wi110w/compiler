@@ -170,11 +170,12 @@ class Lexer:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers[lexeme], lexeme
                         ))
+                        previous_lexeme = ''
                     else:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers_code, lexeme
                         ))
-                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers_code))
+                        previous_lexeme = ''
 
                         identifiers[lexeme] = identifiers_code
                         identifiers_code += 1
