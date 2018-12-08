@@ -42,7 +42,7 @@ class Lexer:
             if self.current_state == READY_STATE:
                 symbol = self.peek()
                 if not symbol:
-                    print("EOF")
+                    callback("EOF")
                     lexemes.append(Lexeme(self.line, self.column, "EOF", 0))
                     break
                 if symbol == 'X' or symbol == 'V':
