@@ -36,6 +36,7 @@ class Lexer:
         begin_lexeme = 0
         alpha_lexeme = False
         non_available_lexeme = False
+        delimiter_comma = False
         while True:
             # READY STATE
             if self.current_state == READY_STATE:
@@ -92,7 +93,19 @@ class Lexer:
             if self.current_state == BEGIN_IDENTIFIER_STATE:
                 symbol = self.peek()
                 if not symbol or symbol in whitespaces:
-                    self.current_state = ERROR_STATE
+                    self.current_state = READY_STATE
+                    if lexeme in identifiers.keys():
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers[lexeme], lexeme
+                        ))
+                    else:
+                        callback("{0}\t{1}\t{2}\t{3}".format(
+                            self.line, begin_lexeme, identifiers_code, lexeme
+                        ))
+
+                        identifiers[lexeme] = identifiers_code
+                        identifiers_code += 1
+                    lexeme = ''
                     continue
                 if symbol == '[':
                     self.current_state = SECOND_IDENTIFIER_STATE
@@ -108,6 +121,23 @@ class Lexer:
                     self.current_state = ERROR_STATE
                     begin_lexeme = self.column
                     continue
+
+                if symbol == ',':
+                    if not delimiter_comma and '0' <= previous_lexeme <= '9':
+                        delimiter_comma = True
+                        symbol = self.pop()
+                        lexeme += symbol
+                        continue
+                    if delimiter_comma:
+                        lexeme += symbol
+                        non_available_lexeme = True
+                        symbol = self.pop()
+                        continue
+                    if not delimiter_comma:
+                        lexeme += symbol
+                        non_available_lexeme = True
+                        symbol = self.pop()
+                        continue
 
                 if symbol in delimiters.keys() \
                         or symbol in non_available_symbols:
@@ -125,6 +155,7 @@ class Lexer:
                 if '0' <= symbol <= '9':
                     symbol = self.pop()
                     lexeme += symbol
+                    previous_lexeme = symbol
                     continue
 
                 if symbol == ']':
