@@ -1,6 +1,6 @@
-from states import *
-from tables import *
-from lexeme import Lexeme
+from signal_lexer.states import *
+from signal_lexer.tables import *
+from signal_lexer.lexeme import Lexeme
 
 '''
 * Peek and Pop
