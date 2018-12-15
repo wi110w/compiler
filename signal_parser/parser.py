@@ -264,7 +264,7 @@ class Parser:
         return self.lexemes.pop(0)
 
     def append_to_tree(self, node):
-        self.tree += '.' * self.shift*2 + node + '\n'
+        self.tree += '.' * self.shift * 2 + node + '\n'
 
     @property
     def current_lexeme(self):
