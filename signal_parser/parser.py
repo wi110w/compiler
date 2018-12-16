@@ -257,6 +257,9 @@ class Parser:
             self.tree += "\nParser Error: Expected delimeter '{}', got '{}' " \
                          "at line {}, column {}".format(expected, actual, line, column)
             return
+        if lexeme_type == 'attribute':
+            self.tree += "\nParser Error: Expected attribute like '{}', got '{}' " \
+                         "at line {}, column {}".format(expected, actual, line, column)
 
     def print_tree(self):
         print(self.tree)
