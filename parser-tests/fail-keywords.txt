@@ -1,0 +1,5 @@
+(* My first SIGNAL program *)
+PROGRAM program;
+PROCEDURE doSomething (a:INTEGER, b:INTEGER);
+BEGUN
+END;

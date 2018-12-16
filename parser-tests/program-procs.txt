@@ -1,0 +1,7 @@
+(* My first SIGNAL program *)
+PROGRAM program;
+PROCEDURE add (a, b:INTEGER;);
+PROCEDURE multiply (a, b:INTEGER;);
+PROCEDURE subtract (a, b:INTEGER;);
+BEGIN
+END;

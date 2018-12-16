@@ -1,0 +1,4 @@
+(* My first SIGNAL program *)
+PROGRAM program;
+BEGIN
+END;
