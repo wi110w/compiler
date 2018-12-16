@@ -200,6 +200,7 @@ class Parser:
         self.append_to_tree('<variable-identifier>')
         self.identifier(lexeme.code, lexeme.value)
         self.shift -= 1
+        return OK
 
     def identifiers_list(self):
         self.shift += 1
@@ -249,11 +250,11 @@ class Parser:
                          "at line {}, column {}".format(expected, actual, line, column)
             return
         if lexeme_type == 'identifier':
-            self.tree += "\nParser Error: Expected identifier, got {} " \
+            self.tree += "\nParser Error: Expected identifier, got '{}' " \
                          "at line {}, column {}".format(actual, line, column)
             return
         if lexeme_type == 'delimiter':
-            self.tree += "\nParser Error: Expected delimeter '{}', got {} " \
+            self.tree += "\nParser Error: Expected delimeter '{}', got '{}' " \
                          "at line {}, column {}".format(expected, actual, line, column)
             return
 
