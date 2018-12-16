@@ -198,6 +198,7 @@ class Lexer:
                             callback("{0}\t{1}\t{2}\t{3}".format(
                                 self.line, begin_lexeme, identifiers[lexeme], lexeme
                             ))
+                            lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers[lexeme]))
 
                         else:
                             callback("{0}\t{1}\t{2}\t{3}".format(
@@ -227,6 +228,7 @@ class Lexer:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers[lexeme], lexeme
                          ))
+                        lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, identifiers[lexeme]))
 
                     else:
                         callback("{0}\t{1}\t{2}\t{3}".format(
