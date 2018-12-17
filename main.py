@@ -11,3 +11,6 @@ file.close()
 parser = Parser(lexemes)
 parser.signal_program()
 parser.print_tree()
+for log in lexer_log:
+    if log.find("Lexer Error") is not -1:
+        print(log)
