@@ -164,6 +164,8 @@ class Lexer:
                     if alpha_lexeme or non_available_lexeme:
                         self.current_state = ERROR_STATE
                         previous_lexeme = ''
+                        alpha_lexeme = False
+                        non_available_lexeme = False
                         continue
                     self.current_state = READY_STATE
                     if lexeme in identifiers:
@@ -181,6 +183,7 @@ class Lexer:
                         identifiers_code += 1
 
                     lexeme = ''
+                    delimiter_comma = False
                     continue
 
             # IDENTIFIER STATE
@@ -345,8 +348,9 @@ class Lexer:
                     lexeme += symbol
                     symbol += self.pop()
                     continue
-                if alpha_lexeme and (symbol in whitespaces or not symbol):
+                if alpha_lexeme and (symbol in whitespaces or not symbol or symbol in delimiters):
                     self.current_state = ERROR_STATE
+                    alpha_lexeme = False
                     continue
                 if lexeme in constants:
                     callback("{0}\t{1}\t{2}\t{3}".format(
