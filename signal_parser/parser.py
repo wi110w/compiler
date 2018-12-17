@@ -174,7 +174,10 @@ class Parser:
         self.add_lexeme(lexeme.code, lexeme.value)
         lexeme = self.advance_lexeme()
         if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE or lexeme.code == delimiters['(']:
-            self.attribute()
+            code = self.attribute()
+            if code is ERROR:
+                self.shift -= 1
+                return ERROR
         else:
             self.add_error(lexeme.line, lexeme.column, 'attribute',
                            'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
@@ -222,7 +225,10 @@ class Parser:
         lexeme = self.current_lexeme
         if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE or lexeme.code == delimiters['(']:
             self.append_to_tree('<attributes-list>')
-            self.attribute()
+            code = self.attribute()
+            if code is ERROR:
+                self.shift -= 1
+                return ERROR
             self.attributes_list()
         self.shift -= 1
 
