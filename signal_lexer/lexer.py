@@ -94,7 +94,7 @@ class Lexer:
                 symbol = self.peek()
                 if not symbol or symbol in whitespaces:
                     self.current_state = READY_STATE
-                    if lexeme in identifiers.keys():
+                    if lexeme in identifiers:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers[lexeme], lexeme
                         ))
@@ -166,7 +166,7 @@ class Lexer:
                         previous_lexeme = ''
                         continue
                     self.current_state = READY_STATE
-                    if lexeme in identifiers.keys():
+                    if lexeme in identifiers:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers[lexeme], lexeme
                         ))
@@ -187,14 +187,14 @@ class Lexer:
             if self.current_state == IDENTIFIER_STATE:
                 symbol = self.peek()
                 if not symbol:
-                    if lexeme in keywords.keys():
+                    if lexeme in keywords:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, keywords[lexeme], lexeme
                         ))
                         lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, keywords[lexeme]))
 
                     else:
-                        if lexeme in identifiers.keys():
+                        if lexeme in identifiers:
                             callback("{0}\t{1}\t{2}\t{3}".format(
                                 self.line, begin_lexeme, identifiers[lexeme], lexeme
                             ))
@@ -217,14 +217,14 @@ class Lexer:
                     symbol = self.pop()
                     lexeme += symbol
                     continue
-                if lexeme in keywords.keys():
+                if lexeme in keywords:
                     callback("{0}\t{1}\t{2}\t{3}".format(
                         self.line, begin_lexeme, keywords[lexeme], lexeme
                     ))
                     lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, keywords[lexeme]))
 
                 else:
-                    if lexeme in identifiers.keys():
+                    if lexeme in identifiers:
                         callback("{0}\t{1}\t{2}\t{3}".format(
                             self.line, begin_lexeme, identifiers[lexeme], lexeme
                          ))
@@ -269,7 +269,7 @@ class Lexer:
             if self.current_state == ERROR_STATE:
                 self.current_state = READY_STATE
                 if previous_lexeme == '[':
-                    callback("Lexer Error: Unexpected EOF inside the comment, line : {0}, column: {1}".format(
+                    callback("Lexer Error: Unexpected EOF inside the identifier, line : {0}, column: {1}".format(
                         self.line, begin_lexeme))
                     previous_lexeme = ''
                     lexeme = ''
@@ -348,11 +348,17 @@ class Lexer:
                 if alpha_lexeme and (symbol in whitespaces or not symbol):
                     self.current_state = ERROR_STATE
                     continue
-                callback("{0}\t{1}\t{2}\t{3}".format(
-                    self.line, begin_lexeme, constants_code, lexeme))
-                lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, constants_code))
-                constants[lexeme] = constants_code
-                constants_code += 1
+                if lexeme in constants:
+                    callback("{0}\t{1}\t{2}\t{3}".format(
+                        self.line, begin_lexeme, constants[lexeme], lexeme
+                    ))
+                    lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, constants[lexeme]))
+                else:
+                    callback("{0}\t{1}\t{2}\t{3}".format(
+                        self.line, begin_lexeme, constants_code, lexeme))
+                    lexemes.append(Lexeme(self.line, begin_lexeme, lexeme, constants_code))
+                    constants[lexeme] = constants_code
+                    constants_code += 1
 
                 self.current_state = READY_STATE
                 lexeme = ''
