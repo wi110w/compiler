@@ -173,11 +173,11 @@ class Parser:
             return ERROR
         self.add_lexeme(lexeme.code, lexeme.value)
         lexeme = self.advance_lexeme()
-        if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE:
-            self.attribute(lexeme.code, lexeme.value)
+        if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE or lexeme.code == delimiters['(']:
+            self.attribute()
         else:
             self.add_error(lexeme.line, lexeme.column, 'attribute',
-                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT', lexeme.value)
+                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
             self.shift -= 1
             return ERROR
         self.attributes_list()
@@ -220,22 +220,56 @@ class Parser:
     def attributes_list(self):
         self.shift += 1
         lexeme = self.current_lexeme
-        if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE:
-            lexeme = self.advance_lexeme()
+        if BEGIN_ATTRIBUTES_CODE <= lexeme.code <= END_ATTRIBUTES_CODE or lexeme.code == delimiters['(']:
             self.append_to_tree('<attributes-list>')
-            self.attribute(lexeme.code, lexeme.value)
+            self.attribute()
             self.attributes_list()
         self.shift -= 1
 
-    def attribute(self, code, value):
+    def attribute(self):
         self.shift += 1
+        lexeme = self.advance_lexeme()
         self.append_to_tree('<attribute>')
-        self.add_lexeme(code, value)
+        self.add_lexeme(lexeme.code, lexeme.value)
+        lexeme = self.advance_lexeme()
+        if lexeme.code not in constants.values():
+            self.add_error(lexeme.line, lexeme.column, 'attribute',
+                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
+            self.shift -= 1
+            return ERROR
+        self.digit(lexeme.code, lexeme.value)
+        lexeme = self.advance_lexeme()
+        if lexeme.code != delimiters[':']:
+            self.add_error(lexeme.line, lexeme.column, 'attribute',
+                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
+            self.shift -= 1
+            return ERROR
+        self.add_lexeme(lexeme.code, lexeme.value)
+        lexeme = self.advance_lexeme()
+        if lexeme.code not in constants.values():
+            self.add_error(lexeme.line, lexeme.column, 'attribute',
+                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
+            self.shift -= 1
+            return ERROR
+        self.digit(lexeme.code, lexeme.value)
+        lexeme = self.advance_lexeme()
+        if lexeme.code != delimiters[')']:
+            self.add_error(lexeme.line, lexeme.column, 'attribute',
+                           'SIGNAL, COMPLEX, INTEGER, FLOAT, BLOCKFLOAT, EXT, (<digit>:<digit>)', lexeme.value)
+            self.shift -= 1
+            return ERROR
+        self.add_lexeme(lexeme.code, lexeme.value)
         self.shift -= 1
 
     def identifier(self, code, value):
         self.shift += 1
         self.append_to_tree('<identifier>')
+        self.add_lexeme(code, value)
+        self.shift -= 1
+
+    def digit(self, code, value):
+        self.shift += 1
+        self.append_to_tree('<digit>')
         self.add_lexeme(code, value)
         self.shift -= 1
 
