@@ -3,7 +3,7 @@ from signal_parser.parser import Parser
 
 lexer_log = []
 lexer = Lexer()
-file = open('parser-tests/program-procs.txt', 'r')
+file = open('parser-tests/real-program.txt', 'r')
 samples = file.read()
 lexemes = lexer.parse_string(samples, lexer_log.append)
 file.close()
